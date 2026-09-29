@@ -9,7 +9,8 @@ use PhpSoftBox\Filter\Phone\Drivers\PhoneDriverEnum;
 use PhpSoftBox\Filter\Phone\PhoneValidationResult;
 
 /**
- * Нормализует телефонные номера через драйвер страны.
+ * Нормализует телефонные номера через драйвер страны ({@see PhoneDriverEnum}: AM, AZ, BY, KZ, RU).
+ * Для RU по умолчанию принимаются только мобильные номера; городские — с mobileOnly: false.
  *
  * Пример:
  * <code>
@@ -22,14 +23,18 @@ final class PhoneFilter implements FilterInterface
     private PhoneCountryDriverInterface $driver;
     private readonly PhoneDriverEnum $driverEnum;
 
+    /**
+     * @param bool $mobileOnly Только мобильные номера (для RU — коды 9xx; false — также городские 3xx, 4xx, 8xx)
+     */
     public function __construct(
         PhoneDriverEnum $driver = PhoneDriverEnum::RU,
         private readonly bool $prepareForDb = true,
         private readonly bool $withCountryCode = false,
         private readonly bool $keepOriginalOnError = false,
+        private readonly bool $mobileOnly = true,
     ) {
         $this->driverEnum = $driver;
-        $this->driver     = $driver->create();
+        $this->driver     = $driver->create($mobileOnly);
     }
 
     public function switchPrepareForDbTo(bool $value): self
@@ -43,6 +48,7 @@ final class PhoneFilter implements FilterInterface
             prepareForDb: $value,
             withCountryCode: $this->withCountryCode,
             keepOriginalOnError: $this->keepOriginalOnError,
+            mobileOnly: $this->mobileOnly,
         );
     }
 

@@ -42,10 +42,15 @@ abstract class PhoneDriverAbstract implements PhoneCountryDriverInterface
             return PhoneValidationResult::makeError(PhoneValidationResult::ERROR_PHONE_EMPTY);
         }
 
-        foreach ($this->countryCodes as $code) {
-            if (str_starts_with($digits, $code)) {
-                $digits = substr($digits, strlen($code));
-                break;
+        // Код страны снимается, только если номер длиннее национального: иначе номер вида 800 123-45-67
+        // потерял бы первую цифру.
+        $nationalLength = $this->totalLength > 0 ? $this->totalLength - 1 : null;
+        if ($nationalLength === null || strlen($digits) > $nationalLength) {
+            foreach ($this->countryCodes as $code) {
+                if (str_starts_with($digits, $code)) {
+                    $digits = substr($digits, strlen($code));
+                    break;
+                }
             }
         }
 

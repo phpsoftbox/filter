@@ -12,18 +12,23 @@ use Throwable;
 
 use function is_array;
 use function is_int;
-use function is_numeric;
 use function is_object;
 use function is_string;
 use function method_exists;
+use function preg_match;
 
 /**
  * Нормализует входные данные в строку даты/времени по заданному формату.
+ *
+ * int — Unix timestamp. Строка разбирается как дата (`DateTimeImmutable`), в том числе числовая: "20240115" —
+ * 15 января 2024, а не секунды от 1970. Числовую строку как timestamp (например, из query string) нужно
+ * включить явно: `numericStringAsTimestamp: true`.
  *
  * Пример:
  * <code>
  * $filter = new DateTimeFilter(format: 'Y-m-d H:i:s', timezone: 'UTC');
  * $filter(1700000000); // '2023-11-14 22:13:20'
+ * $filter('20240115'); // '2024-01-15 00:00:00'
  * </code>
  */
 final readonly class DateTimeFilter implements FilterInterface
@@ -32,6 +37,7 @@ final readonly class DateTimeFilter implements FilterInterface
         private string $format = 'Y-m-d H:i:s',
         private ?string $timezone = null,
         private bool $returnOriginalOnError = false,
+        private bool $numericStringAsTimestamp = false,
     ) {
     }
 
@@ -54,7 +60,7 @@ final readonly class DateTimeFilter implements FilterInterface
 
             if ($value instanceof DateTimeInterface) {
                 $date = DateTimeImmutable::createFromInterface($value);
-            } elseif (is_int($value) || (is_string($value) && is_numeric($value))) {
+            } elseif (is_int($value) || ($this->numericStringAsTimestamp && is_string($value) && preg_match('/^-?\d+$/', $value) === 1)) {
                 $date = new DateTimeImmutable('@' . (string) $value);
             } else {
                 $date = new DateTimeImmutable((string) $value, $timezone);

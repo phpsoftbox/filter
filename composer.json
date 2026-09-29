@@ -13,7 +13,8 @@
         "sort-packages": true
     },
     "require": {
-        "php": "^8.5"
+        "php": "^8.5",
+        "phpsoftbox/inflector": "dev-master"
     },
     "require-dev": {
         "phpsoftbox/cs-fixer": "^1.2.1",

@@ -10,6 +10,7 @@ use PhpSoftBox\Filter\FilterAdapter;
 use PhpSoftBox\Filter\IntegerFilter;
 use PhpSoftBox\Filter\Phone\Drivers\PhoneDriverEnum;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -17,8 +18,33 @@ use function trim;
 
 #[CoversClass(FilterAdapter::class)]
 #[CoversClass(NullValueNotAllowedException::class)]
+#[CoversMethod(FilterAdapter::class, 'int')]
+#[CoversMethod(FilterAdapter::class, 'intOrNull')]
+#[CoversMethod(FilterAdapter::class, 'string')]
+#[CoversMethod(FilterAdapter::class, 'stringOrNull')]
+#[CoversMethod(FilterAdapter::class, 'float')]
+#[CoversMethod(FilterAdapter::class, 'floatOrNull')]
+#[CoversMethod(FilterAdapter::class, 'bool')]
+#[CoversMethod(FilterAdapter::class, 'boolOrNull')]
+#[CoversMethod(FilterAdapter::class, 'phone')]
+#[CoversMethod(FilterAdapter::class, 'phoneOrNull')]
+#[CoversMethod(FilterAdapter::class, 'list')]
+#[CoversMethod(FilterAdapter::class, 'listOrNull')]
+#[CoversMethod(FilterAdapter::class, 'array')]
+#[CoversMethod(FilterAdapter::class, 'arrayOrNull')]
+#[CoversMethod(FilterAdapter::class, 'json')]
+#[CoversMethod(FilterAdapter::class, 'jsonOrNull')]
+#[CoversMethod(FilterAdapter::class, 'apply')]
+#[CoversMethod(FilterAdapter::class, 'applyOrNull')]
+#[CoversMethod(FilterAdapter::class, 'applyFilterClass')]
 final class FilterAdapterTest extends TestCase
 {
+    /**
+     * Проверим, что int()/intOrNull() приводят строку к int, а нераспознанное значение даёт null.
+     *
+     * @see FilterAdapter::int()
+     * @see FilterAdapter::intOrNull()
+     */
     #[Test]
     public function intAndIntOrNullWork(): void
     {
@@ -29,6 +55,11 @@ final class FilterAdapterTest extends TestCase
         self::assertSame(7, $adapter->int('7'));
     }
 
+    /**
+     * Проверим, что int() бросает NullValueNotAllowedException для null.
+     *
+     * @see FilterAdapter::int()
+     */
     #[Test]
     public function intThrowsOnNullResult(): void
     {
@@ -39,6 +70,12 @@ final class FilterAdapterTest extends TestCase
         $adapter->int(null);
     }
 
+    /**
+     * Проверим, что string()/stringOrNull() обрезают пробелы, а пустая строка даёт null.
+     *
+     * @see FilterAdapter::string()
+     * @see FilterAdapter::stringOrNull()
+     */
     #[Test]
     public function stringAndStringOrNullWork(): void
     {
@@ -49,6 +86,11 @@ final class FilterAdapterTest extends TestCase
         self::assertSame('42', $adapter->string(42));
     }
 
+    /**
+     * Проверим, что string() бросает NullValueNotAllowedException для пустой строки.
+     *
+     * @see FilterAdapter::string()
+     */
     #[Test]
     public function stringThrowsOnNullResult(): void
     {
@@ -59,6 +101,12 @@ final class FilterAdapterTest extends TestCase
         $adapter->string('   ');
     }
 
+    /**
+     * Проверим, что float()/floatOrNull() приводят строку к float.
+     *
+     * @see FilterAdapter::float()
+     * @see FilterAdapter::floatOrNull()
+     */
     #[Test]
     public function floatAndFloatOrNullWork(): void
     {
@@ -69,6 +117,11 @@ final class FilterAdapterTest extends TestCase
         self::assertSame(8.0, $adapter->float('8'));
     }
 
+    /**
+     * Проверим, что float() бросает NullValueNotAllowedException для null.
+     *
+     * @see FilterAdapter::float()
+     */
     #[Test]
     public function floatThrowsOnNullResult(): void
     {
@@ -79,6 +132,12 @@ final class FilterAdapterTest extends TestCase
         $adapter->float(null);
     }
 
+    /**
+     * Проверим, что bool()/boolOrNull() распознают булевы строки.
+     *
+     * @see FilterAdapter::bool()
+     * @see FilterAdapter::boolOrNull()
+     */
     #[Test]
     public function boolAndBoolOrNullWork(): void
     {
@@ -90,6 +149,11 @@ final class FilterAdapterTest extends TestCase
         self::assertTrue($adapter->bool('1'));
     }
 
+    /**
+     * Проверим, что bool() бросает NullValueNotAllowedException для нераспознанного значения.
+     *
+     * @see FilterAdapter::bool()
+     */
     #[Test]
     public function boolThrowsOnNullResult(): void
     {
@@ -100,6 +164,12 @@ final class FilterAdapterTest extends TestCase
         $adapter->bool('unknown');
     }
 
+    /**
+     * Проверим, что phone()/phoneOrNull() нормализуют номер через драйвер страны.
+     *
+     * @see FilterAdapter::phone()
+     * @see FilterAdapter::phoneOrNull()
+     */
     #[Test]
     public function phoneAndPhoneOrNullWork(): void
     {
@@ -111,6 +181,11 @@ final class FilterAdapterTest extends TestCase
         self::assertSame('77123456', $adapter->phone('+374 (77) 123-456', PhoneDriverEnum::AM));
     }
 
+    /**
+     * Проверим, что phone() бросает NullValueNotAllowedException для некорректного номера.
+     *
+     * @see FilterAdapter::phone()
+     */
     #[Test]
     public function phoneThrowsOnNullResult(): void
     {
@@ -121,6 +196,12 @@ final class FilterAdapterTest extends TestCase
         $adapter->phone('123');
     }
 
+    /**
+     * Проверим, что list()/listOrNull() строят список и применяют поэлементные фильтры.
+     *
+     * @see FilterAdapter::list()
+     * @see FilterAdapter::listOrNull()
+     */
     #[Test]
     public function listAndListOrNullWork(): void
     {
@@ -131,6 +212,11 @@ final class FilterAdapterTest extends TestCase
         self::assertSame([1, 2], $adapter->list([' 1 ', '2'], itemFilters: [static fn (mixed $v): mixed => trim((string) $v), new IntegerFilter()]));
     }
 
+    /**
+     * Проверим, что list() бросает NullValueNotAllowedException для null.
+     *
+     * @see FilterAdapter::list()
+     */
     #[Test]
     public function listThrowsOnNullResult(): void
     {
@@ -141,6 +227,12 @@ final class FilterAdapterTest extends TestCase
         $adapter->list(null);
     }
 
+    /**
+     * Проверим, что array()/arrayOrNull() приводят значение к массиву и применяют поэлементные фильтры.
+     *
+     * @see FilterAdapter::array()
+     * @see FilterAdapter::arrayOrNull()
+     */
     #[Test]
     public function arrayAndArrayOrNullWork(): void
     {
@@ -151,6 +243,11 @@ final class FilterAdapterTest extends TestCase
         self::assertSame([1, 2], $adapter->array([' 1 ', '2'], asList: true, itemFilters: [static fn (mixed $v): mixed => trim((string) $v), new IntegerFilter()]));
     }
 
+    /**
+     * Проверим, что array() бросает NullValueNotAllowedException для null.
+     *
+     * @see FilterAdapter::array()
+     */
     #[Test]
     public function arrayThrowsOnNullResult(): void
     {
@@ -161,6 +258,12 @@ final class FilterAdapterTest extends TestCase
         $adapter->array(null);
     }
 
+    /**
+     * Проверим, что json()/jsonOrNull() декодируют JSON.
+     *
+     * @see FilterAdapter::json()
+     * @see FilterAdapter::jsonOrNull()
+     */
     #[Test]
     public function jsonAndJsonOrNullWork(): void
     {
@@ -173,6 +276,11 @@ final class FilterAdapterTest extends TestCase
         self::assertSame(['fallback' => true], $adapter->jsonOrNull('{broken', default: ['fallback' => true]));
     }
 
+    /**
+     * Проверим, что json() бросает NullValueNotAllowedException для null.
+     *
+     * @see FilterAdapter::json()
+     */
     #[Test]
     public function jsonThrowsOnNullResult(): void
     {
@@ -183,6 +291,11 @@ final class FilterAdapterTest extends TestCase
         $adapter->json('{broken');
     }
 
+    /**
+     * Проверим, что apply() принимает один фильтр и список фильтров (FilterInterface и Closure).
+     *
+     * @see FilterAdapter::apply()
+     */
     #[Test]
     public function applySupportsSingleAndPipelineFilters(): void
     {
@@ -192,6 +305,11 @@ final class FilterAdapterTest extends TestCase
         self::assertSame(15, $adapter->apply(' 15 ', [static fn (mixed $v): mixed => trim((string) $v), new IntegerFilter()]));
     }
 
+    /**
+     * Проверим, что applyOrNull() превращает InvalidArgumentException фильтра в null.
+     *
+     * @see FilterAdapter::applyOrNull()
+     */
     #[Test]
     public function applyOrNullSwallowsFilterInvalidArgumentException(): void
     {
@@ -202,6 +320,11 @@ final class FilterAdapterTest extends TestCase
         self::assertNull($adapter->applyOrNull($object, new IntegerFilter()));
     }
 
+    /**
+     * Проверим, что applyFilterClass() создаёт фильтр по классу и отклоняет класс без FilterInterface.
+     *
+     * @see FilterAdapter::applyFilterClass()
+     */
     #[Test]
     public function applyFilterClassWorksAndValidatesClassType(): void
     {

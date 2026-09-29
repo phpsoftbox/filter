@@ -29,6 +29,7 @@ use PhpSoftBox\Filter\StrReplaceFilter;
 use PhpSoftBox\Filter\TrimFilter;
 use PhpSoftBox\Filter\UppercaseFilter;
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\CoversMethod;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
@@ -52,10 +53,35 @@ use PHPUnit\Framework\TestCase;
 #[CoversClass(PhoneFilter::class)]
 #[CoversClass(DefaultFilter::class)]
 #[CoversClass(StringFilter::class)]
+#[CoversMethod(LowercaseFilter::class, '__invoke')]
+#[CoversMethod(UppercaseFilter::class, '__invoke')]
+#[CoversMethod(NullIfEmptyFilter::class, '__invoke')]
+#[CoversMethod(DigitsFilter::class, '__invoke')]
+#[CoversMethod(EmptyFilter::class, '__invoke')]
+#[CoversMethod(ExplodeFilter::class, '__invoke')]
+#[CoversMethod(SlugFilter::class, '__invoke')]
+#[CoversMethod(ArrayFilter::class, '__invoke')]
+#[CoversMethod(ListFilter::class, '__invoke')]
+#[CoversMethod(JsonDecodeFilter::class, '__invoke')]
+#[CoversMethod(DateTimeFilter::class, '__invoke')]
+#[CoversMethod(TrimFilter::class, '__invoke')]
+#[CoversMethod(StrReplaceFilter::class, '__invoke')]
+#[CoversMethod(PregReplaceFilter::class, '__invoke')]
+#[CoversMethod(BooleanFilter::class, '__invoke')]
+#[CoversMethod(IntegerFilter::class, '__invoke')]
+#[CoversMethod(FloatFilter::class, '__invoke')]
+#[CoversMethod(PhoneFilter::class, '__invoke')]
+#[CoversMethod(DefaultFilter::class, '__invoke')]
+#[CoversMethod(StringFilter::class, '__invoke')]
 final class FiltersTest extends TestCase
 {
     /**
      * Проверяет базовую работу TrimFilter и StrReplaceFilter.
+     *
+     * @see TrimFilter::__invoke()
+     * @see StrReplaceFilter::__invoke()
+     * @see LowercaseFilter::__invoke()
+     * @see UppercaseFilter::__invoke()
      */
     #[Test]
     public function stringFiltersNormalizeValues(): void
@@ -71,6 +97,8 @@ final class FiltersTest extends TestCase
 
     /**
      * Проверяет, что строковые фильтры не принимают массивы.
+     *
+     * @see TrimFilter::__invoke()
      */
     #[Test]
     public function stringFiltersRejectArrayValues(): void
@@ -83,6 +111,8 @@ final class FiltersTest extends TestCase
 
     /**
      * Проверяет работу PregReplaceFilter.
+     *
+     * @see PregReplaceFilter::__invoke()
      */
     #[Test]
     public function pregReplaceFilterWorks(): void
@@ -94,6 +124,9 @@ final class FiltersTest extends TestCase
 
     /**
      * Проверяет DigitsFilter и NullIfEmptyFilter.
+     *
+     * @see DigitsFilter::__invoke()
+     * @see NullIfEmptyFilter::__invoke()
      */
     #[Test]
     public function digitsAndNullFiltersWork(): void
@@ -108,6 +141,8 @@ final class FiltersTest extends TestCase
 
     /**
      * Проверяет SlugFilter.
+     *
+     * @see SlugFilter::__invoke()
      */
     #[Test]
     public function slugFilterBuildsSlug(): void
@@ -120,6 +155,10 @@ final class FiltersTest extends TestCase
 
     /**
      * Проверяет ArrayFilter и ListFilter.
+     *
+     * @see ArrayFilter::__invoke()
+     * @see ListFilter::__invoke()
+     * @see ExplodeFilter::__invoke()
      */
     #[Test]
     public function arrayFiltersNormalizeLists(): void
@@ -137,6 +176,12 @@ final class FiltersTest extends TestCase
 
     /**
      * Проверяет поэлементную фильтрацию в ArrayFilter и ListFilter.
+     *
+     * @see ArrayFilter::__invoke()
+     * @see TrimFilter::__invoke()
+     * @see IntegerFilter::__invoke()
+     * @see ListFilter::__invoke()
+     * @see ExplodeFilter::__invoke()
      */
     #[Test]
     public function arrayFiltersApplyPerItemFilters(): void
@@ -151,6 +196,9 @@ final class FiltersTest extends TestCase
 
     /**
      * Проверяет skipEmpty в ArrayFilter и ListFilter.
+     *
+     * @see ArrayFilter::__invoke()
+     * @see ListFilter::__invoke()
      */
     #[Test]
     public function arrayAndListFiltersSkipEmptyValues(): void
@@ -164,6 +212,8 @@ final class FiltersTest extends TestCase
 
     /**
      * Проверяет удаление null и пустых строк в EmptyFilter.
+     *
+     * @see EmptyFilter::__invoke()
      */
     #[Test]
     public function emptyFilterRemovesNullAndEmptyValues(): void
@@ -177,6 +227,15 @@ final class FiltersTest extends TestCase
 
     /**
      * Проверяет JsonDecodeFilter.
+     *
+     * @see JsonDecodeFilter::__invoke()
+     * @see DateTimeFilter::__invoke()
+     * @see BooleanFilter::__invoke()
+     * @see IntegerFilter::__invoke()
+     * @see FloatFilter::__invoke()
+     * @see StringFilter::__invoke()
+     * @see DefaultFilter::__invoke()
+     * @see PhoneFilter::__invoke()
      */
     #[Test]
     public function jsonDecodeFilterWorks(): void
@@ -189,6 +248,8 @@ final class FiltersTest extends TestCase
 
     /**
      * Проверяет DateTimeFilter.
+     *
+     * @see DateTimeFilter::__invoke()
      */
     #[Test]
     public function dateTimeFilterNormalizesValue(): void
@@ -201,6 +262,11 @@ final class FiltersTest extends TestCase
 
     /**
      * Проверяет преобразование к boolean/integer/float.
+     *
+     * @see BooleanFilter::__invoke()
+     * @see IntegerFilter::__invoke()
+     * @see FloatFilter::__invoke()
+     * @see StringFilter::__invoke()
      */
     #[Test]
     public function typeFiltersCastValues(): void
@@ -220,6 +286,8 @@ final class FiltersTest extends TestCase
 
     /**
      * Проверяет работу DefaultFilter для null/пустой строки.
+     *
+     * @see DefaultFilter::__invoke()
      */
     #[Test]
     public function defaultFilterAppliesFallbackForNullAndEmptyString(): void
@@ -234,6 +302,8 @@ final class FiltersTest extends TestCase
 
     /**
      * Проверяет, что фильтры типов отклоняют нестроковые объекты.
+     *
+     * @see IntegerFilter::__invoke()
      */
     #[Test]
     public function typeFiltersRejectNonStringableObject(): void
@@ -248,6 +318,8 @@ final class FiltersTest extends TestCase
 
     /**
      * Проверяет, что JsonDecodeFilter отклоняет массивы.
+     *
+     * @see JsonDecodeFilter::__invoke()
      */
     #[Test]
     public function jsonDecodeFilterRejectsArray(): void
@@ -260,6 +332,8 @@ final class FiltersTest extends TestCase
 
     /**
      * Проверяет, что PhoneFilter нормализует номер по умолчанию.
+     *
+     * @see PhoneFilter::__invoke()
      */
     #[Test]
     public function phoneFilterNormalizesPhone(): void
@@ -272,6 +346,8 @@ final class FiltersTest extends TestCase
 
     /**
      * Проверяет переключение режима PhoneFilter для форматированного вывода.
+     *
+     * @see PhoneFilter::__invoke()
      */
     #[Test]
     public function phoneFilterSwitchesPrepareForDbMode(): void
@@ -286,6 +362,8 @@ final class FiltersTest extends TestCase
 
     /**
      * Проверяет, что PhoneFilter поддерживает новые country-драйверы.
+     *
+     * @see PhoneFilter::__invoke()
      */
     #[Test]
     public function phoneFilterSupportsAmAzByDrivers(): void

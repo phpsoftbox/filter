@@ -34,7 +34,14 @@ $port = $filters->int('8080');
 $value = $filters->apply(' 42 ', [new TrimFilter(), new IntegerFilter()]);
 ```
 
-Компонент также содержит фильтры массивов, JSON, дат, строк и телефонных номеров.
+`apply()` принимает фильтр, `Closure` или список из них; callable-массивы и строки-функции не принимаются —
+оборачивайте их в `Closure` (`$obj->method(...)`).
+
+Компонент также содержит фильтры массивов, JSON, дат, строк и телефонных номеров. Важные правила:
+- `IntegerFilter` не усекает: дробное значение (`1.9`, `'1.5'`) и значение вне диапазона `int` дают default;
+- `SlugFilter` транслитерирует кириллицу так же, как `Inflector::urlize()` (`'Привет мир'` → `'privet-mir'`);
+- `DateTimeFilter` считает timestamp только `int`; числовую строку — с `numericStringAsTimestamp: true`;
+- `PhoneFilter` для RU по умолчанию принимает только мобильные номера (`mobileOnly: false` — и городские).
 Подробные примеры доступны в [docs/usage.md](docs/usage.md).
 
 ## Breaking change

@@ -4,16 +4,21 @@ declare(strict_types=1);
 
 namespace PhpSoftBox\Filter;
 
+use Closure;
 use InvalidArgumentException;
+use LogicException;
 use PhpSoftBox\Filter\Exception\NullValueNotAllowedException;
 use PhpSoftBox\Filter\Phone\Drivers\PhoneDriverEnum;
 
+use function array_values;
+use function get_debug_type;
 use function is_a;
 use function is_array;
 use function is_bool;
 use function is_float;
 use function is_int;
 use function is_string;
+use function sprintf;
 
 final readonly class FilterAdapter
 {
@@ -39,9 +44,14 @@ final readonly class FilterAdapter
     }
 
     /**
-     * @param FilterInterface|callable(mixed):mixed|list<FilterInterface|callable(mixed):mixed> $filters
+     * Применяет фильтр или цепочку фильтров. Функция-фильтр передаётся только как Closure: массив всегда
+     * считается списком фильтров, поэтому callable-массив ([$obj, 'method']) и строки-функции не принимаются —
+     * оберните их в Closure (`$obj->method(...)`, `trim(...)`).
+     *
+     * @param FilterInterface|Closure(mixed):mixed|list<FilterInterface|Closure(mixed):mixed> $filters
+     * @throws LogicException Если элемент списка не FilterInterface и не Closure.
      */
-    public function apply(mixed $value, FilterInterface|callable|array $filters): mixed
+    public function apply(mixed $value, FilterInterface|Closure|array $filters): mixed
     {
         foreach ($this->normalizeFilters($filters) as $filter) {
             $value = $filter($value);
@@ -51,9 +61,12 @@ final readonly class FilterAdapter
     }
 
     /**
-     * @param FilterInterface|callable(mixed):mixed|list<FilterInterface|callable(mixed):mixed> $filters
+     * Как apply(), но InvalidArgumentException фильтра превращается в null. Неверный список фильтров
+     * (элемент не FilterInterface и не Closure) — ошибка конфигурации, она не подавляется.
+     *
+     * @param FilterInterface|Closure(mixed):mixed|list<FilterInterface|Closure(mixed):mixed> $filters
      */
-    public function applyOrNull(mixed $value, FilterInterface|callable|array $filters): mixed
+    public function applyOrNull(mixed $value, FilterInterface|Closure|array $filters): mixed
     {
         try {
             return $this->apply($value, $filters);
@@ -151,6 +164,7 @@ final readonly class FilterAdapter
         bool $prepareForDb = true,
         bool $withCountryCode = false,
         bool $keepOriginalOnError = false,
+        bool $mobileOnly = true,
     ): ?string {
         $casted = $this->applyOrNull(
             $value,
@@ -159,6 +173,7 @@ final readonly class FilterAdapter
                 prepareForDb: $prepareForDb,
                 withCountryCode: $withCountryCode,
                 keepOriginalOnError: $keepOriginalOnError,
+                mobileOnly: $mobileOnly,
             ),
         );
 
@@ -171,6 +186,7 @@ final readonly class FilterAdapter
         bool $prepareForDb = true,
         bool $withCountryCode = false,
         bool $keepOriginalOnError = false,
+        bool $mobileOnly = true,
     ): string {
         $casted = $this->phoneOrNull(
             value: $value,
@@ -178,6 +194,7 @@ final readonly class FilterAdapter
             prepareForDb: $prepareForDb,
             withCountryCode: $withCountryCode,
             keepOriginalOnError: $keepOriginalOnError,
+            mobileOnly: $mobileOnly,
         );
 
         if ($casted === null) {
@@ -319,15 +336,26 @@ final readonly class FilterAdapter
     }
 
     /**
-     * @param FilterInterface|callable(mixed):mixed|list<FilterInterface|callable(mixed):mixed> $filters
-     * @return list<callable(mixed):mixed>
+     * @param FilterInterface|Closure(mixed):mixed|list<FilterInterface|Closure(mixed):mixed> $filters
+     * @return list<FilterInterface|Closure(mixed):mixed>
      */
-    private function normalizeFilters(FilterInterface|callable|array $filters): array
+    private function normalizeFilters(FilterInterface|Closure|array $filters): array
     {
-        if (is_array($filters)) {
-            return $filters;
+        if (!is_array($filters)) {
+            return [$filters];
         }
 
-        return [$filters];
+        foreach ($filters as $index => $filter) {
+            if (!$filter instanceof FilterInterface && !$filter instanceof Closure) {
+                throw new LogicException(sprintf(
+                    'Filter #%s must be %s or Closure, %s given.',
+                    (string) $index,
+                    FilterInterface::class,
+                    get_debug_type($filter),
+                ));
+            }
+        }
+
+        return array_values($filters);
     }
 }

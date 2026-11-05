@@ -10,13 +10,17 @@ final class PhoneAzDriver extends PhoneDriverAbstract
 
     protected ?int $totalLength = 10;
 
+    protected string $formatPattern = '/(\d{2})(\d{3})(\d{2})(\d{2})/';
+
+    protected string $dialCode = '994';
+
     protected function getFormattedMask(bool $withCountryCode): string
     {
         if ($withCountryCode) {
-            return '+994 ($1) $2-$3$4';
+            return '+994 ($1) $2-$3-$4';
         }
 
-        return '($1) $2-$3$4';
+        return '($1) $2-$3-$4';
     }
 
     /**

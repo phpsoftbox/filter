@@ -9,7 +9,7 @@ use PhpSoftBox\Filter\Phone\Drivers\PhoneDriverEnum;
 use PhpSoftBox\Filter\Phone\PhoneValidationResult;
 
 /**
- * Нормализует телефонные номера через драйвер страны ({@see PhoneDriverEnum}: AM, AZ, BY, KZ, RU).
+ * Нормализует телефонные номера через драйвер страны ({@see PhoneDriverEnum}: AM, AZ, BY, CN, KZ, RU).
  * Для RU по умолчанию принимаются только мобильные номера; городские — с mobileOnly: false.
  *
  * Пример:

@@ -10,13 +10,17 @@ final class PhoneAmDriver extends PhoneDriverAbstract
 
     protected ?int $totalLength = 9;
 
+    protected string $formatPattern = '/(\d{2})(\d{3})(\d{3})/';
+
+    protected string $dialCode = '374';
+
     protected function getFormattedMask(bool $withCountryCode): string
     {
         if ($withCountryCode) {
-            return '+374 ($1) $2-$3$4';
+            return '+374 ($1) $2-$3';
         }
 
-        return '($1) $2-$3$4';
+        return '($1) $2-$3';
     }
 
     /**

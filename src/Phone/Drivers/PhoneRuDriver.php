@@ -16,6 +16,8 @@ final class PhoneRuDriver extends PhoneDriverAbstract
 
     protected ?int $totalLength = 11;
 
+    protected string $dialCode = '7';
+
     public function __construct(
         private readonly bool $mobileOnly = true,
     ) {
@@ -24,10 +26,10 @@ final class PhoneRuDriver extends PhoneDriverAbstract
     protected function getFormattedMask(bool $withCountryCode): string
     {
         if ($withCountryCode) {
-            return '+7 ($1) $2-$3$4';
+            return '+7 ($1) $2-$3-$4';
         }
 
-        return '($1) $2-$3$4';
+        return '($1) $2-$3-$4';
     }
 
     /**

@@ -357,7 +357,7 @@ final class FiltersTest extends TestCase
         $formatted = $filter->switchPrepareForDbTo(false);
 
         self::assertSame('9991234567', $filter('+7 (999) 123-45-67'));
-        self::assertSame('(999) 123-4567', $formatted('+7 (999) 123-45-67'));
+        self::assertSame('(999) 123-45-67', $formatted('+7 (999) 123-45-67'));
     }
 
     /**

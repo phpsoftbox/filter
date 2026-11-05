@@ -42,6 +42,8 @@ $value = $filters->apply(' 42 ', [new TrimFilter(), new IntegerFilter()]);
 - `SlugFilter` транслитерирует кириллицу так же, как `Inflector::urlize()` (`'Привет мир'` → `'privet-mir'`);
 - `DateTimeFilter` считает timestamp только `int`; числовую строку — с `numericStringAsTimestamp: true`;
 - `PhoneFilter` для RU по умолчанию принимает только мобильные номера (`mobileOnly: false` — и городские).
+- номера нескольких стран хранятся в E.164: `InternationalPhoneFilter` и `PhoneNumber` (страна по номеру, вывод по
+  маске страны); драйверы AM, AZ, BY, CN, KZ, RU.
 Подробные примеры доступны в [docs/usage.md](docs/usage.md).
 
 ## Breaking change

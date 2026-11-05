@@ -10,13 +10,15 @@ final class PhoneKzDriver extends PhoneDriverAbstract
 
     protected ?int $totalLength = 11;
 
+    protected string $dialCode = '7';
+
     protected function getFormattedMask(bool $withCountryCode): string
     {
         if ($withCountryCode) {
-            return '+7 ($1) $2-$3$4';
+            return '+7 ($1) $2-$3-$4';
         }
 
-        return '($1) $2-$3$4';
+        return '($1) $2-$3-$4';
     }
 
     /**

@@ -31,6 +31,21 @@ abstract class PhoneDriverAbstract implements PhoneCountryDriverInterface
 
     protected ?int $totalLength = null;
 
+    /**
+     * Международный код страны без «+» (7, 86, 375…): с ним номер сохраняется в E.164.
+     */
+    protected string $dialCode = '';
+
+    /**
+     * Группы цифр национального номера для форматирования; номера маски ($1, $2…) ссылаются на эти группы.
+     */
+    protected string $formatPattern = '/(\d{3})?(\d{3})?(\d{2})?(\d{2})?/';
+
+    public function dialCode(): string
+    {
+        return $this->dialCode;
+    }
+
     public function format(?string $rawDigits, bool $prepareForDb, bool $withCountryCode): PhoneValidationResult
     {
         if (!$rawDigits) {
@@ -71,13 +86,13 @@ abstract class PhoneDriverAbstract implements PhoneCountryDriverInterface
             return PhoneValidationResult::makeError(PhoneValidationResult::ERROR_INVALID_LENGTH);
         }
 
+        // Для БД: национальные цифры, а с кодом страны — E.164 (+79991234567), однозначный для любой страны.
         if ($prepareForDb) {
-            return PhoneValidationResult::makeSuccess($digits);
+            return PhoneValidationResult::makeSuccess($withCountryCode ? '+' . $this->dialCode . $digits : $digits);
         }
 
-        $pattern   = '/(\d{3})?(\d{3})?(\d{2})?(\d{2})?/';
         $mask      = $this->getFormattedMask($withCountryCode);
-        $formatted = preg_replace($pattern, $mask, $digits, 1) ?? '';
+        $formatted = preg_replace($this->formatPattern, $mask, $digits, 1) ?? '';
 
         return PhoneValidationResult::makeSuccess(trim($formatted));
     }

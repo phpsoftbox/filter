@@ -69,4 +69,57 @@ final class PhoneFilterTest extends TestCase
 
         self::assertSame('7011234567', $filter('+7 (701) 123-45-67'));
     }
+
+    /**
+     * Проверим, что с prepareForDb и withCountryCode номер сохраняется в E.164.
+     *
+     * @see PhoneFilter::__invoke()
+     */
+    #[Test]
+    public function prepareForDbWithCountryCodeReturnsE164(): void
+    {
+        $filter = new PhoneFilter(withCountryCode: true);
+
+        self::assertSame('+79991234567', $filter('8 (999) 123-45-67'));
+    }
+
+    /**
+     * Проверим, что драйвер Китая нормализует мобильный номер с кодом +86 и 0086.
+     *
+     * @see PhoneFilter::__invoke()
+     * @see PhoneDriverEnum::create()
+     */
+    #[Test]
+    public function cnNormalizesMobileNumber(): void
+    {
+        $filter = new PhoneFilter(PhoneDriverEnum::CN);
+
+        self::assertSame(['13812345678', '13812345678'], [$filter('+86 138 1234 5678'), $filter('0086 13812345678')]);
+    }
+
+    /**
+     * Проверим, что драйвер Китая форматирует номер группами 3-4-4.
+     *
+     * @see PhoneFilter::__invoke()
+     */
+    #[Test]
+    public function cnFormatsNumberInGroupsOfThreeFourFour(): void
+    {
+        $filter = new PhoneFilter(PhoneDriverEnum::CN, prepareForDb: false, withCountryCode: true);
+
+        self::assertSame('+86 138 1234 5678', $filter('13812345678'));
+    }
+
+    /**
+     * Проверим, что номер Китая не с 1 и неверной длины отклоняется.
+     *
+     * @see PhoneFilter::__invoke()
+     */
+    #[Test]
+    public function cnRejectsNonMobileNumbers(): void
+    {
+        $filter = new PhoneFilter(PhoneDriverEnum::CN);
+
+        self::assertSame([null, null], [$filter('+86 21 1234 5678'), $filter('+86 138 1234 567')]);
+    }
 }
